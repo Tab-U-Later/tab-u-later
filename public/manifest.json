@@ -1,25 +1,24 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
+  "manifest_version": 2,
+  "name": "Tab-U-Later",
+  "version": "0.0.0.1",
+
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "tabs", "declarativeContent", "storage"
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+  "options_page": "options.html",
+  "page_action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "images/icon_8.png",
+      "32": "images/icon_8.png",
+      "48": "images/icon_8.png",
+      "128": "images/icon_8.png"
+    }
+  }
 }
