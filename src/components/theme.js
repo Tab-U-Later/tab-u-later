@@ -12,7 +12,7 @@ export const theme = createMuiTheme({
   },
   overrides: {
     MuiDrawer: {
-      width: '200px'
+      width: '250px'
     }
   }
 });

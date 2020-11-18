@@ -29,7 +29,6 @@ const ButtonContainer = styled.div`
 
 const Header = styled.h2`
   text-align: left;
-  margin-left: 5px;
 `
 
 const HeadContainer = styled.div`
@@ -37,23 +36,23 @@ const HeadContainer = styled.div`
   justify-content: space-between;
   flex-direction: row;
   align-items: center;
-  padding-bottom: 5px;
+  margin: 3px 5px;
 `
 
-const Container2 = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin: 10px 0px;
+const SelAll = styled(Button)`
+  margin-left: 10px !important;
 `
 
+const DoneButton = styled(IconButton)`
+  margin-right: 5px !important;
+`
 
 const AddPage = () => {
   const [open, setOpen] = useState(false);
   const [tabs, setTabs] = useState(null);
   const [selections, setSelections] = useState({});
   const [isDone, setDone] = useState(false);
-  const [selAll, setSelAll] = useState(false);
+  const [selAll, setSelAll] = useState(null);
   const [seshName, setSeshName] = useState(null);
 
   const toggleDrawer = (event) => {
@@ -69,28 +68,27 @@ const AddPage = () => {
     })
   }
 
-  const handleChange = (event) => {
-    setSelections({...selections, [event.target.name]: event.target.checked})
+  const handleChange = (event, url) => {
+    setSelections({...selections, [event.target.name]: {checked: event.target.checked, url: url}})
   }
 
   const addSession = async () => {
     setOpen(false);
     let session = [];
     for(const key in selections){
-      if(selections[key] === true){
-        session.push(key);
+      if(selections[key]['checked'] === true || selAll === true){
+        session.push({title: key, url: selections[key]['url']});
       }
     }
-    await chrome.storage.sync.set({[seshName]: session}, function(){
-      console.log("set storage")
-    });
+
+    await chrome.storage.sync.set({[seshName]: session});
   }
 
   useEffect(() => {
     getTabs();
     let anyChecked = selAll;
     for(const key in selections){
-      if(selections[key] === true){
+      if(selections[key]['checked'] === true){
         anyChecked = true;
       }
     }
@@ -119,12 +117,12 @@ const AddPage = () => {
             <Divider/>
 
             <ButtonContainer>
-              <Button onClick={() => setSelAll(!selAll)} color="secondary">
+              <SelAll onClick={() => setSelAll(!selAll)} color="secondary">
                 Select All
-              </Button>
-              {isDone ? <IconButton color='secondary' onClick={addSession}>
+              </SelAll>
+              {isDone ? <DoneButton color='secondary' onClick={addSession}>
                 <Done />
-              </IconButton> : null}
+              </DoneButton> : null}
             </ButtonContainer>
 
             <Divider />
@@ -132,9 +130,9 @@ const AddPage = () => {
               {tabs.map((tab) => (
                 <ListItem>
                   <FormControlLabel
-                    control={<Checkbox color='primary' checked={(selections[tab.url] ? selections[tab.url] : false) || selAll}
-                    onChange={handleChange}
-                    name={tab.url}/>}
+                    control={<Checkbox color='primary' checked={(selAll === true ? true : (selections[tab.title] ? selections[tab.title]['checked'] : false))}
+                    onChange={(e) => handleChange(e, tab.url)}
+                    name={tab.title}/>}
                     label={tab.title.length > 10 ? tab.title.substring(0,10) + '...' : tab.title}
                   />
                 </ListItem>

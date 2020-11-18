@@ -24,14 +24,12 @@ const Container= styled.div`
 const SessionPage = () => {
   const [sessions, setSessions] = useState({});
 
-  useEffect(() => {
-    chrome.storage.sync.get(null, function (data) {
+  useEffect(async () => {
+    await chrome.storage.sync.get(null, function (data) {
       setSessions(data);
-      console.log(data);
     })
   })
 
-  console.log(sessions);
   return (
     <Container>
       <Header>My Sessions</Header>
