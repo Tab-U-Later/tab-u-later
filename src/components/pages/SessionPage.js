@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import SessionCard from '../cards/SessionCard';
+import {AppBar, Grid } from '@material-ui/core'
 
 
-const SeshContainer = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  flex-direction: row;
+const SeshContainer = styled(Grid)`
+  position: absolute;
+  top: 80px;
+  left: 20px;
   margin: 10px;
 `
 
@@ -32,12 +32,21 @@ const SessionPage = () => {
 
   return (
     <Container>
-      <Header>My Sessions</Header>
-      <SeshContainer>
+      <AppBar>
+        <Header>My Sessions</Header>
+      </AppBar>
+      <SeshContainer container justify="flex-start" spacing={3}>
+        {Object.entries(sessions).map(([key,value]) => (
+          <Grid key={key} item>
+            <SessionCard name={key} content={value}/>
+          </Grid>
+        ))}
+      </SeshContainer>
+      {/* <SeshContainer>
         {Object.entries(sessions).map(([key,value]) => (
           <SessionCard name={key} content={value}/>
         ))}
-      </SeshContainer>
+      </SeshContainer> */}
     </Container>
   )
 }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField } from '@material-ui/core';
-import { DeleteForever, Remove, Close } from '@material-ui/icons'
+import { DeleteForever, Remove, Close, Done } from '@material-ui/icons'
 
 const TField = styled(TextField)`
   position: relative;
@@ -39,58 +39,65 @@ const DoneButton = styled(IconButton)`
 
 
 const EditCard = (props) => {
-  const [open, setOpen] = useState(props.open);
   const [newName, updateSeshName] = useState(null)
   const [selAll, setSelAll] = useState(null);
   const [selections, setSelections] = useState({});
   const [tabs, setTabs] = useState(props.content);
-  const isDone = true;
+  const [isDone, setDone] = useState(false);
+  const [isValid, setValidName] = useState(false);
 
   useEffect( () => {
-    console.log("Tabs:", tabs)
-    tabs.forEach(async (tab) => {
-      await setSelections({...selections, [tab.title]: { checked: false, url: tab.url }})
-      console.log(selections)
+    let selects = {}
+    tabs.forEach((tab) => {
+      selects = {...selects, [tab.title]: { checked: false, url: tab.url }}
     })
+    setSelections(selects)
   }, [])
 
-  useEffect(() => {
-    setOpen(props.open)
-  }, [props])
 
+  const updateName = async () => {
+    await chrome.storage.sync.remove([props.name]);
+    await chrome.storage.sync.set({
+      [newName]: tabs
+    })
+    props.toggleDrawer(false);
+  }
 
-  const updateSession = async () => {
+  const removeTabs = () => {
     let newSesh = [];
     Object.entries(selections).forEach(([key,value]) => {
       if(value.checked === false){
         newSesh.push({url: value.url, title: key})
       }
     })
-    console.log(newSesh);
     setTabs(newSesh);
-    if (newName === null) {
-      await chrome.storage.sync.set({
-        [props.name]: newSesh
-      })
-    }
-    if (newName !== null) {
-      await chrome.storage.sync.remove([props.name]);
-      await chrome.storage.sync.set({
-        [newName]: newSesh
-      })
-    }
+
+    chrome.storage.sync.set({
+      [props.name]: newSesh
+    })
   }
 
   const handleChange = (event, url) => {
     setSelections({...selections, [event.target.name]: { checked: event.target.checked, url: url } })
   }
 
+  useEffect(() => {
+    let anyChecked = false;
+    for(const key in selections){
+      if(selections[key]['checked'] === true){
+        anyChecked = true;
+      }
+    }
+    setDone(anyChecked)
+    setValidName(newName !== null && newName !== '')
+  })
+
   return (
-    <Drawer anchor="left" open={open}>
+    <Drawer anchor="left" open={props.open}>
       <div>
         <HeadContainer>
           <Header>{`Edit ${props.name}`}</Header>
-          <IconButton onClick={() => setOpen(false)}>
+          <IconButton onClick={() => props.toggleDrawer(false)}>
             <Close />
           </IconButton>
         </HeadContainer>
@@ -102,11 +109,13 @@ const EditCard = (props) => {
         <Divider />
 
         <ButtonContainer>
-          <SelAll onClick={() => setSelAll(!selAll)} color="secondary">
-            Select All
-              </SelAll>
-          {isDone ? <DoneButton color='secondary' onClick={updateSession}>
-            <Remove />
+          {isDone ?
+          <IconButton color='secondary'>
+            <Remove onClick={removeTabs}/>
+          </IconButton>: null}
+          {isValid ?
+          <DoneButton color='secondary' onClick={updateName}>
+            <Done/>
           </DoneButton> : null}
         </ButtonContainer>
 

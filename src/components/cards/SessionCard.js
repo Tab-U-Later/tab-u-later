@@ -11,6 +11,7 @@ const Container = styled(Paper)`
   height: 100px;
   width: 150px;
   margin: 5px;
+  // flex: 0 0 150px;
 `
 
 const Title = styled.h2`
@@ -36,11 +37,14 @@ const SessionCard = (props) => {
   const [titles, setTitles] = useState([]);
 
   useEffect(()=>{
+    let links = [];
+    let names = [];
     props.content.forEach((tab) => {
-      setUrls([...urls, tab.url]);
-      setTitles([...titles, tab.title]);
+      links.push(tab.url);
+      names.push(tab.title);
     })
-    console.log(urls);
+    setUrls(links);
+    setTitles(names);
   }, [])
 
   const openSession = () => {
@@ -65,7 +69,7 @@ const SessionCard = (props) => {
           <Delete/>
         </IconButton>
       </ButtonContainer>
-      <EditCard open={open} content={props.content} name={props.name}/>
+      <EditCard open={open} content={props.content} name={props.name} toggleDrawer={setOpen}/>
     </Container>
   )
 }

@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "/static/css/main.5f698cdf.chunk.css",
-    "main.js": "/static/js/main.659195bc.chunk.js",
-    "runtime-main.js": "/static/js/runtime-main.3f238704.js",
+    "main.js": "/static/js/main.4be75164.chunk.js",
+    "runtime-main.js": "/static/js/runtime-main.342f3a57.js",
     "static/css/2.a1cb809c.chunk.css": "/static/css/2.a1cb809c.chunk.css",
-    "static/js/2.837d3f6f.chunk.js": "/static/js/2.837d3f6f.chunk.js",
-    "static/js/3.e5bc720d.chunk.js": "/static/js/3.e5bc720d.chunk.js",
+    "static/js/2.8fc7cf9c.chunk.js": "/static/js/2.8fc7cf9c.chunk.js",
+    "static/js/3.3b7a4586.chunk.js": "/static/js/3.3b7a4586.chunk.js",
     "index.html": "/index.html",
     "static/media/logo.103b5fa1.svg": "/static/media/logo.103b5fa1.svg",
     "static/media/index.css": "/static/media/open-sans-vietnamese-400-normal.5ec64a94.woff2"
   },
   "entrypoints": [
-    "static/js/runtime-main.3f238704.js",
+    "static/js/runtime-main.342f3a57.js",
     "static/css/2.a1cb809c.chunk.css",
-    "static/js/2.837d3f6f.chunk.js",
+    "static/js/2.8fc7cf9c.chunk.js",
     "static/css/main.5f698cdf.chunk.css",
-    "static/js/main.659195bc.chunk.js"
+    "static/js/main.4be75164.chunk.js"
   ]
 }

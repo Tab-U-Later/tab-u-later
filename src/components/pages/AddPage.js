@@ -62,10 +62,16 @@ const AddPage = () => {
     setOpen(!open);
   };
 
-  const getTabs = async () => {
-    await chrome.tabs.query({ currentWindow: true }, function (result) {
+  const getTabs = () => {
+    chrome.tabs.query({ currentWindow: true }, function (result) {
       setTabs(result);
+      let selects = {}
+      result.forEach((tab) => {
+        selects = {...selects, [tab.title]: { checked: false, url: tab.url }}
+      })
+      setSelections(selects)
     })
+
   }
 
   const handleChange = (event, url) => {
@@ -80,12 +86,23 @@ const AddPage = () => {
         session.push({title: key, url: selections[key]['url']});
       }
     }
-
     await chrome.storage.sync.set({[seshName]: session});
+  }
+
+  const handleSelectAll = () => {
+    let selects = {}
+    for(const key in selections){
+      selects = {...selects, [key]: {url: selections[key]['url'], checked: !selAll}}
+    }
+    setSelections(selects)
+    setSelAll(!selAll);
   }
 
   useEffect(() => {
     getTabs();
+  }, [])
+
+  useEffect(() => {
     let anyChecked = selAll;
     for(const key in selections){
       if(selections[key]['checked'] === true){
@@ -95,9 +112,11 @@ const AddPage = () => {
     setDone(anyChecked && seshName!==null && seshName!=='')
   })
 
+
+
   return (
     <div>
-      <FButton onClick={(event) => toggleDrawer(event)} color='primary' aria-label='add'>
+      <FButton onClick={(event) => toggleDrawer(event)} color='secondary' aria-label='add'>
         <Add />
       </FButton>
       <Drawer anchor="left" open={open}>
@@ -117,7 +136,7 @@ const AddPage = () => {
             <Divider/>
 
             <ButtonContainer>
-              <SelAll onClick={() => setSelAll(!selAll)} color="secondary">
+              <SelAll onClick={() => handleSelectAll()} color="secondary">
                 Select All
               </SelAll>
               {isDone ? <DoneButton color='secondary' onClick={addSession}>
@@ -130,7 +149,7 @@ const AddPage = () => {
               {tabs.map((tab) => (
                 <ListItem>
                   <FormControlLabel
-                    control={<Checkbox color='primary' checked={(selAll === true ? true : (selections[tab.title] ? selections[tab.title]['checked'] : false))}
+                    control={<Checkbox color='primary' checked={selections[tab.title] ? selections[tab.title]['checked'] : false}
                     onChange={(e) => handleChange(e, tab.url)}
                     name={tab.title}/>}
                     label={tab.title.length > 10 ? tab.title.substring(0,10) + '...' : tab.title}
