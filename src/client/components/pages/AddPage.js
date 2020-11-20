@@ -36,7 +36,7 @@ const HeadContainer = styled.div`
   justify-content: space-between;
   flex-direction: row;
   align-items: center;
-  margin: 3px 5px;
+  margin: 3px 10px 3px 15px;
 `
 
 const SelAll = styled(Button)`
@@ -152,7 +152,7 @@ const AddPage = () => {
                     control={<Checkbox color='primary' checked={selections[tab.title] ? selections[tab.title]['checked'] : false}
                     onChange={(e) => handleChange(e, tab.url)}
                     name={tab.title}/>}
-                    label={tab.title.length > 10 ? tab.title.substring(0,10) + '...' : tab.title}
+                    label={tab.title.length > 15 ? tab.title.substring(0,15) + '...' : tab.title}
                   />
                 </ListItem>
               ))}

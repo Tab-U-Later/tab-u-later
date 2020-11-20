@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import {Paper, IconButton} from '@material-ui/core'
 import {Launch, Delete, Edit} from '@material-ui/icons'
 import EditCard from './EditCard'
-
+import {fetchTitle} from '../../../main/src/fetchTitle'
 
 const Container = styled(Paper)`
   height: 100px;
@@ -37,6 +37,7 @@ const SessionCard = (props) => {
   const [titles, setTitles] = useState([]);
 
   useEffect(()=>{
+
     let links = [];
     let names = [];
     props.content.forEach((tab) => {

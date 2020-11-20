@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField } from '@material-ui/core';
-import { DeleteForever, Remove, Close, Done } from '@material-ui/icons'
+import { DeleteForever, Remove, Close, Done, Check } from '@material-ui/icons'
+import { fetchTitle } from '../../../main/src/fetchTitle';
 
 const TField = styled(TextField)`
-  position: relative;
-  margin: 15px 10px !important;
 `
 const ButtonContainer = styled.div`
   position: relative;
@@ -26,7 +25,7 @@ const HeadContainer = styled.div`
   justify-content: space-between;
   flex-direction: row;
   align-items: center;
-  margin: 3px 5px;
+  margin: 3px 10px 3px 15px;
 `
 
 const SelAll = styled(Button)`
@@ -40,6 +39,7 @@ const DoneButton = styled(IconButton)`
 
 const EditCard = (props) => {
   const [newName, updateSeshName] = useState(null)
+  const [addUrl, updateUrl] = useState(null);
   const [selAll, setSelAll] = useState(null);
   const [selections, setSelections] = useState({});
   const [tabs, setTabs] = useState(props.content);
@@ -60,6 +60,7 @@ const EditCard = (props) => {
     await chrome.storage.sync.set({
       [newName]: tabs
     })
+    updateSeshName('');
     props.toggleDrawer(false);
   }
 
@@ -79,6 +80,13 @@ const EditCard = (props) => {
 
   const handleChange = (event, url) => {
     setSelections({...selections, [event.target.name]: { checked: event.target.checked, url: url } })
+  }
+/*TODO: check errors for URL and display proper error warning*/
+  const addTab = () => {
+    fetchTitle(addUrl, (content) => {
+      chrome.storage.sync.set({[props.name]: [...tabs, content]})
+      setTabs([...tabs, content])
+    })
   }
 
   useEffect(() => {
@@ -103,8 +111,22 @@ const EditCard = (props) => {
         </HeadContainer>
 
         <Divider />
+        <List subheader={<ListSubheader disableSticky>Change Session Name</ListSubheader>}>
+          <ListItem>
+            <TField id="outlined-basic" label="Rename Session" variant="outlined" size="small" value={newName} onChange={(e) => updateSeshName(e.target.value)} />
+          </ListItem>
+        </List>
 
-        <TField id="outlined-basic" label="Rename Session" variant="outlined" size="small" value={newName} onChange={(e) => updateSeshName(e.target.value)} />
+        <Divider />
+
+        <List subheader={<ListSubheader disableSticky>Add A Tab</ListSubheader>}>
+          <ListItem>
+            <TField id="outlined-basic" label="Tab URL" variant="outlined" size="small" value={addUrl} onChange={(e) => updateUrl(e.target.value)} />
+          </ListItem>
+          <IconButton onClick={() => addTab()}>
+            <Check/>
+          </IconButton>
+        </List>
 
         <Divider />
 
@@ -128,7 +150,7 @@ const EditCard = (props) => {
                 checked={selections[tab.title] ? selections[tab.title]['checked'] : false}
                 onChange={(e) => handleChange(e, tab.url)}
                 name={tab.title} />}
-                label={tab.title.length > 10 ? tab.title.substring(0, 10) + '...' : tab.title}
+                label={tab.title.length > 15 ? tab.title.substring(0, 15) + '...' : tab.title}
                 checkedIcon={<DeleteForever/>}
               />
             </ListItem>
