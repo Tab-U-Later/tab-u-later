@@ -1,21 +1,21 @@
 {
   "files": {
     "main.css": "/static/css/main.5f698cdf.chunk.css",
-    "main.js": "/static/js/main.61ed0528.chunk.js",
-    "runtime-main.js": "/static/js/runtime-main.1c180a14.js",
+    "main.js": "/static/js/main.d82af317.chunk.js",
+    "runtime-main.js": "/static/js/runtime-main.aaaee9c5.js",
     "static/css/2.a1cb809c.chunk.css": "/static/css/2.a1cb809c.chunk.css",
-    "static/js/2.5c703490.chunk.js": "/static/js/2.5c703490.chunk.js",
-    "static/js/3.90b04a09.chunk.js": "/static/js/3.90b04a09.chunk.js",
+    "static/js/2.309c2724.chunk.js": "/static/js/2.309c2724.chunk.js",
+    "static/js/3.969cbf54.chunk.js": "/static/js/3.969cbf54.chunk.js",
     "index.html": "/index.html",
-    "static/js/2.5c703490.chunk.js.LICENSE.txt": "/static/js/2.5c703490.chunk.js.LICENSE.txt",
+    "static/js/2.309c2724.chunk.js.LICENSE.txt": "/static/js/2.309c2724.chunk.js.LICENSE.txt",
     "static/media/logo.103b5fa1.svg": "/static/media/logo.103b5fa1.svg",
     "static/media/index.css": "/static/media/open-sans-vietnamese-400-normal.5ec64a94.woff2"
   },
   "entrypoints": [
-    "static/js/runtime-main.1c180a14.js",
+    "static/js/runtime-main.aaaee9c5.js",
     "static/css/2.a1cb809c.chunk.css",
-    "static/js/2.5c703490.chunk.js",
+    "static/js/2.309c2724.chunk.js",
     "static/css/main.5f698cdf.chunk.css",
-    "static/js/main.61ed0528.chunk.js"
+    "static/js/main.d82af317.chunk.js"
   ]
 }
