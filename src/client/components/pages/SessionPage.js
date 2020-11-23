@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import SessionCard from '../cards/SessionCard';
 import {AppBar, Grid } from '@material-ui/core'
 
-
 const SeshContainer = styled(Grid)`
   position: absolute;
   top: 80px;

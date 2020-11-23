@@ -5,24 +5,25 @@ import styled from 'styled-components'
 import {Paper, IconButton} from '@material-ui/core'
 import {Launch, Delete, Edit} from '@material-ui/icons'
 import EditCard from './EditCard'
-import {fetchTitle} from '../../../main/src/fetchTitle'
 
 const Container = styled(Paper)`
   height: 100px;
   width: 150px;
   margin: 5px;
-  // flex: 0 0 150px;
 `
 
-const Title = styled.h2`
+const Title = styled.p`
+  position: relative !important:
+  top: 10px !important;
   text-align: center;
   font-family: "Open Sans";
-`
-
-const OpenBut = styled(IconButton)`
+  font-size: 1.5em;
+  font-weight: bold;
 `
 
 const ButtonContainer = styled.div`
+  position: relative !important:
+  top: 10px !important;
   display: flex;
   flex-direction: row;
   right: 0;
@@ -58,18 +59,18 @@ const SessionCard = (props) => {
 
   return (
     <Container elevation={3}>
-      <Title>{props.name}</Title>
-      <ButtonContainer>
-        <IconButton onClick={() => openSession()}>
-          <Launch/>
-        </IconButton>
-        <IconButton onClick={() => setOpen(true)}>
-          <Edit/>
-        </IconButton>
-        <IconButton onClick={() => removeSession()}>
-          <Delete/>
-        </IconButton>
-      </ButtonContainer>
+        <Title>{props.name}</Title>
+        <ButtonContainer>
+          <IconButton onClick={() => openSession()}>
+            <Launch/>
+          </IconButton>
+          <IconButton onClick={() => setOpen(true)}>
+            <Edit/>
+          </IconButton>
+          <IconButton onClick={() => removeSession()}>
+            <Delete/>
+          </IconButton>
+        </ButtonContainer>
       <EditCard open={open} content={props.content} name={props.name} toggleDrawer={setOpen}/>
     </Container>
   )

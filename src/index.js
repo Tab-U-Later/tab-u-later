@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import reportWebVitals from './main/src/utils/reportWebVitals';
 import {ThemeProvider} from '@material-ui/core/styles'
 import {theme} from '../src/client/components/theme'
 

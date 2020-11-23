@@ -2,22 +2,18 @@
 
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField } from '@material-ui/core';
+import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField, Modal, Backdrop, Fade, Paper } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles'
 import { DeleteForever, Remove, Close, Done, Check } from '@material-ui/icons'
-import { fetchTitle } from '../../../main/src/fetchTitle';
+import { fetchTitle } from '../../../main/src/utils/fetchTitle';
+import UrlNotFound from '../utils/UrlNotFound';
 
 const TField = styled(TextField)`
-`
-const ButtonContainer = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  margin: 15px 0px;
 `
 
 const Header = styled.h2`
   text-align: left;
+
 `
 
 const HeadContainer = styled.div`
@@ -27,39 +23,30 @@ const HeadContainer = styled.div`
   align-items: center;
   margin: 3px 10px 3px 15px;
 `
+const Title = styled.p`
+  font-size: 1.5em !important;
+  font-family: "Open Sans" !important;
 
-const SelAll = styled(Button)`
-  margin-left: 10px !important;
 `
-
-const DoneButton = styled(IconButton)`
-  margin-right: 5px !important;
-`
-
-const ListContainer = styled(ListItem)`
-  display: flex;
-  flex-direction: row;
-  justify-content space-between;
-`
-
 
 const EditCard = (props) => {
   const [newName, updateSeshName] = useState(null)
   const [addUrl, updateUrl] = useState(null);
-  const [selAll, setSelAll] = useState(null);
-  const [selections, setSelections] = useState({});
+  const [modalOpen, setModal] = useState(false)
   const [tabs, setTabs] = useState(props.content);
-  const [isDone, setDone] = useState(false);
-  const [isValid, setValidName] = useState(false);
 
-  useEffect(() => {
-    let selects = {}
-    tabs.forEach((tab) => {
-      selects = { ...selects, [tab.title]: { checked: false, url: tab.url } }
-    })
-    setSelections(selects)
-  }, [])
+  const classes = makeStyles(iconStyles)();
 
+  function iconStyles() {
+    return {
+      successIcon: {
+        color: 'green',
+      },
+      errorIcon: {
+        color: 'red',
+      },
+    }
+  }
 
   const updateName = async () => {
     await chrome.storage.sync.remove([props.name]);
@@ -70,11 +57,11 @@ const EditCard = (props) => {
     props.toggleDrawer(false);
   }
 
-  const removeTabs = () => {
+  const removeTabs = (title) => {
     let newSesh = [];
-    Object.entries(selections).forEach(([key, value]) => {
-      if (value.checked === false) {
-        newSesh.push({ url: value.url, title: key })
+    tabs.forEach((tab) => {
+      if (tab.title !== title) {
+        newSesh.push(tab)
       }
     })
     setTabs(newSesh);
@@ -84,27 +71,19 @@ const EditCard = (props) => {
     })
   }
 
-  const handleChange = (event, url) => {
-    setSelections({ ...selections, [event.target.name]: { checked: event.target.checked, url: url } })
-  }
+
   /*TODO: check errors for URL and display proper error warning*/
   const addTab = () => {
     fetchTitle(addUrl, (content) => {
-      chrome.storage.sync.set({ [props.name]: [...tabs, content] })
-      setTabs([...tabs, content])
+      if (content !== 404) {
+        chrome.storage.sync.set({ [props.name]: [...tabs, content] })
+        setTabs([...tabs, content])
+      }
+      else {
+        setModal(true)
+      }
     })
   }
-
-  useEffect(() => {
-    let anyChecked = false;
-    for (const key in selections) {
-      if (selections[key]['checked'] === true) {
-        anyChecked = true;
-      }
-    }
-    setDone(anyChecked)
-    setValidName(newName !== null && newName !== '')
-  })
 
   return (
     <Drawer anchor="left" open={props.open}>
@@ -117,10 +96,11 @@ const EditCard = (props) => {
         </HeadContainer>
 
         <Divider />
+
         <List subheader={<ListSubheader disableSticky>Change Session Name</ListSubheader>}>
           <ListItem>
             <TField id="outlined-basic" label="Rename Session" variant="outlined" size="small" value={newName} onChange={(e) => updateSeshName(e.target.value)} />
-            <IconButton color={(newName === null || newName.length < 0) ? 'secondary': 'default'} disabled={newName === null || newName.length < 0}onClick={updateName}>
+            <IconButton className={(newName === null || newName === '') ? 'null' : classes.successIcon} disabled={newName === null || newName === ''} onClick={updateName}>
               <Check />
             </IconButton>
           </ListItem>
@@ -128,13 +108,14 @@ const EditCard = (props) => {
 
         <Divider />
 
-        <List subheader={<ListSubheader disableSticky>Add A Tab</ListSubheader>}>
+        <List subheader={<ListSubheader disableSticky>Add a Tab</ListSubheader>}>
           <ListItem>
             <TField id="outlined-basic" label="Tab URL" variant="outlined" size="small" value={addUrl} onChange={(e) => updateUrl(e.target.value)} />
-            <IconButton onClick={() => addTab()}>
+            <IconButton className={(addUrl === null || addUrl === '') ? 'null' : classes.successIcon} disabled={addUrl === null || addUrl === ''} onClick={() => addTab()}>
               <Check />
             </IconButton>
           </ListItem>
+          <UrlNotFound toggleModal={setModal} open={modalOpen} />
         </List>
 
         <Divider />
@@ -142,14 +123,10 @@ const EditCard = (props) => {
         <List subheader={<ListSubheader disableSticky>Saved Tabs</ListSubheader>}>
           {tabs.map((tab) => (
             <ListItem>
-              <FormControlLabel
-                control={<Checkbox color='primary'
-                  checked={selections[tab.title] ? selections[tab.title]['checked'] : false}
-                  onChange={(e) => handleChange(e, tab.url)}
-                  name={tab.title} />}
-                label={tab.title.length > 15 ? tab.title.substring(0, 15) + '...' : tab.title}
-                checkedIcon={<DeleteForever />}
-              />
+              <IconButton size='medium' className={classes.errorIcon} onClick={() => removeTabs(tab.title)}>
+                <Remove />
+              </IconButton>
+              <Title>{tab.title.length > 15 ? tab.title.substring(0, 15) + '...' : tab.title}</Title>
             </ListItem>
           ))}
         </List>
