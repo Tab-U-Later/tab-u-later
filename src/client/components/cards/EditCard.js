@@ -1,12 +1,15 @@
 /* global chrome */
 
-import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
-import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField, Modal, Backdrop, Fade, Paper } from '@material-ui/core';
+import React, { useState, useEffect, useRef, useContext } from 'react'
+import styled, {keyframes} from 'styled-components'
+import { Divider, Drawer, List, ListItem, ListSubheader, IconButton, TextField} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
-import { DeleteForever, Remove, Close, Done, Check } from '@material-ui/icons'
+import {Remove, Close, Check } from '@material-ui/icons'
 import { fetchTitle } from '../../../main/src/utils/fetchTitle';
 import UrlNotFound from '../utils/UrlNotFound';
+import { usePrevious } from '../utils/usePrevious';
+import { useOnScreen } from '../utils/useOnScreen';
+import { Context } from '../../../store';
 
 const TField = styled(TextField)`
 `
@@ -28,15 +31,32 @@ const Title = styled.p`
   font-family: "Open Sans" !important;
 
 `
+const colorOut = keyframes`
+  from {background-color: green;}
+  to {background-color: white;}
+`
+
+const RemoveItem = styled(ListItem)`
+  &.new{
+    background-color: green;
+    &.isVisible{
+      animation: ${colorOut} ease 2s 1;
+      animation-fill-mode: forwards
+    }
+  }
+`
+
 
 const EditCard = (props) => {
   const [newName, updateSeshName] = useState(null)
   const [addUrl, updateUrl] = useState(null);
   const [modalOpen, setModal] = useState(false)
-  const [tabs, setTabs] = useState(props.content);
-
+  const [diff, setDiff] = useState(null);
+  const {state, dispatch} = useContext(Context);
+  const prev = usePrevious(state.sessions[props.name])
+  const myRef = useRef();
+  const onScreen = useOnScreen(myRef);
   const classes = makeStyles(iconStyles)();
-
   function iconStyles() {
     return {
       successIcon: {
@@ -51,7 +71,7 @@ const EditCard = (props) => {
   const updateName = async () => {
     await chrome.storage.sync.remove([props.name]);
     await chrome.storage.sync.set({
-      [newName]: tabs
+      [newName]: state.sessions[props.name]
     })
     updateSeshName('');
     props.toggleDrawer(false);
@@ -59,31 +79,46 @@ const EditCard = (props) => {
 
   const removeTabs = (title) => {
     let newSesh = [];
-    tabs.forEach((tab) => {
+    state.sessions[props.name].forEach((tab) => {
       if (tab.title !== title) {
         newSesh.push(tab)
       }
     })
-    setTabs(newSesh);
 
+    dispatch({type: "REMOVE_TAB", payload: {name: props.name, session: newSesh}});
     chrome.storage.sync.set({
       [props.name]: newSesh
     })
   }
 
 
-  /*TODO: check errors for URL and display proper error warning*/
   const addTab = () => {
     fetchTitle(addUrl, (content) => {
       if (content !== 404) {
-        chrome.storage.sync.set({ [props.name]: [...tabs, content] })
-        setTabs([...tabs, content])
+        chrome.storage.sync.set({ [props.name]: [...state.sessions[props.name], content] })
+        dispatch({type: "ADD_TAB", payload: {name: props.name, url: content}})
+        updateUrl('')
       }
       else {
         setModal(true)
       }
     })
   }
+
+  useEffect(()=> {
+    if(prev !== undefined){
+      const differ = state.sessions[props.name].filter(tab => !prev.includes(tab))
+      setDiff(differ[0]);
+    }
+  }, [state.sessions[props.name]])
+
+  useEffect(()=> {
+    if(onScreen === true){
+      return function cleanup(){
+        setDiff(null);
+      }
+    }
+  }, [onScreen])
 
   return (
     <Drawer anchor="left" open={props.open}>
@@ -121,13 +156,13 @@ const EditCard = (props) => {
         <Divider />
 
         <List subheader={<ListSubheader disableSticky>Saved Tabs</ListSubheader>}>
-          {tabs.map((tab) => (
-            <ListItem>
+          {state.sessions[props.name].map((tab) => (
+            <RemoveItem ref={diff && (tab.title === diff.title ? myRef : null)} className={diff && (tab.title === diff.title ? (onScreen ? 'new isVisible' : 'new') : null)}>
               <IconButton size='medium' className={classes.errorIcon} onClick={() => removeTabs(tab.title)}>
                 <Remove />
               </IconButton>
               <Title>{tab.title.length > 15 ? tab.title.substring(0, 15) + '...' : tab.title}</Title>
-            </ListItem>
+            </RemoveItem>
           ))}
         </List>
       </div>

@@ -1,10 +1,11 @@
 /* global chrome */
 
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import styled from 'styled-components'
 import {Paper, IconButton} from '@material-ui/core'
 import {Launch, Delete, Edit} from '@material-ui/icons'
 import EditCard from './EditCard'
+import { Context } from '../../../store'
 
 const Container = styled(Paper)`
   height: 100px;
@@ -35,18 +36,13 @@ const SessionCard = (props) => {
 
   const [open, setOpen] = useState(false);
   const [urls, setUrls] = useState([]);
-  const [titles, setTitles] = useState([]);
-
+  const { state, dispatch } = useContext(Context);
   useEffect(()=>{
-
     let links = [];
-    let names = [];
-    props.content.forEach((tab) => {
+    state.sessions[props.name].forEach((tab) => {
       links.push(tab.url);
-      names.push(tab.title);
     })
     setUrls(links);
-    setTitles(names);
   }, [])
 
   const openSession = () => {
@@ -54,6 +50,7 @@ const SessionCard = (props) => {
   }
 
   const removeSession = () => {
+    dispatch({type: "REMOVE_SESSION", payload: props.name})
     chrome.storage.sync.remove([props.name]);
   }
 
@@ -71,7 +68,7 @@ const SessionCard = (props) => {
             <Delete/>
           </IconButton>
         </ButtonContainer>
-      <EditCard open={open} content={props.content} name={props.name} toggleDrawer={setOpen}/>
+      <EditCard open={open} name={props.name} toggleDrawer={setOpen}/>
     </Container>
   )
 }

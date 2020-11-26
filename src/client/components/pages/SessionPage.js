@@ -1,9 +1,10 @@
 /* global chrome */
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
 import SessionCard from '../cards/SessionCard';
-import {AppBar, Grid } from '@material-ui/core'
+import { AppBar, Grid } from '@material-ui/core'
+import { Context } from '../../../store';
 
 const SeshContainer = styled(Grid)`
   position: absolute;
@@ -16,18 +17,18 @@ const Header = styled.h1`
   text-align: center;
   margin: 15px 0px;
 `
-const Container= styled.div`
+const Container = styled.div`
   margin-bottom: 15px;
 `
 
 const SessionPage = () => {
-  const [sessions, setSessions] = useState({});
+  const { state, dispatch } = useContext(Context);
 
-  useEffect(async () => {
-    await chrome.storage.sync.get(null, function (data) {
-      setSessions(data);
+  useEffect(() => {
+    chrome.storage.sync.get(null, function (data) {
+      dispatch({ type: "SET_SESSIONS", payload: data })
     })
-  })
+  }, [])
 
   return (
     <Container>
@@ -35,17 +36,16 @@ const SessionPage = () => {
         <Header>My Sessions</Header>
       </AppBar>
       <SeshContainer container justify="flex-start" spacing={3}>
-        {Object.entries(sessions).map(([key,value]) => (
-          <Grid key={key} item>
-            <SessionCard name={key} content={value}/>
-          </Grid>
-        ))}
+        {Object.keys(state.sessions).length >= 1 ?
+          Object.entries(state.sessions).map(([key, value]) => (
+            <Grid key={key} item>
+              <SessionCard name={key} />
+            </Grid>
+          ))
+          :
+          <div>hi</div>}
+
       </SeshContainer>
-      {/* <SeshContainer>
-        {Object.entries(sessions).map(([key,value]) => (
-          <SessionCard name={key} content={value}/>
-        ))}
-      </SeshContainer> */}
     </Container>
   )
 }

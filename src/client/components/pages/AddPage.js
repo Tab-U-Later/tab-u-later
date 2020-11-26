@@ -1,10 +1,11 @@
 /* global chrome */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import styled from 'styled-components'
 import Fab from '@material-ui/core/Fab';
 import {Add, Close, Done} from '@material-ui/icons';
 import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField } from '@material-ui/core';
+import { Context } from '../../../store';
 
 
 const FButton = styled(Fab)`
@@ -54,6 +55,7 @@ const AddPage = () => {
   const [isDone, setDone] = useState(false);
   const [selAll, setSelAll] = useState(null);
   const [seshName, setSeshName] = useState(null);
+  const { state, dispatch } = useContext(Context);
 
   const toggleDrawer = (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -86,6 +88,7 @@ const AddPage = () => {
         session.push({title: key, url: selections[key]['url']});
       }
     }
+    dispatch({type: "ADD_SESSION", payload: {seshName, session}})
     await chrome.storage.sync.set({[seshName]: session});
   }
 
@@ -110,7 +113,7 @@ const AddPage = () => {
       }
     }
     setDone(anyChecked && seshName!==null && seshName!=='')
-  })
+  }, [handleChange, handleSelectAll])
 
 
 

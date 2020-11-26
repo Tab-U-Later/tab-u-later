@@ -1,19 +1,21 @@
 /* global chrome */
-import logo from './logo.svg';
+import {useEffect, useReducer, useState} from 'react'
+import "fontsource-open-sans";
 import './App.css';
 import AddPage from '../src/client/components/pages/AddPage';
+import {Context, reducer} from './store'
 import SessionPage from '../src/client/components/pages/SessionPage';
-import "fontsource-open-sans";
+import { getStorageData } from './client/components/utils/storage';
 
 function App() {
+  const initialState= {sessions : {}}
 
-  // chrome.storage.sync.clear();
-
+  const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <div>
+    <Context.Provider value={{state , dispatch}}>
       <SessionPage/>
       <AddPage/>
-    </div>
+    </Context.Provider>
   );
 }
 
