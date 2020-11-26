@@ -32,13 +32,13 @@ const Title = styled.p`
 
 `
 const colorOut = keyframes`
-  from {background-color: green;}
+  from {background-color: #D0FF4D;}
   to {background-color: white;}
 `
 
 const RemoveItem = styled(ListItem)`
   &.new{
-    background-color: green;
+    background-color: #D0FF4D;
     &.isVisible{
       animation: ${colorOut} ease 2s 1;
       animation-fill-mode: forwards
@@ -60,7 +60,7 @@ const EditCard = (props) => {
   function iconStyles() {
     return {
       successIcon: {
-        color: 'green',
+        color: '#82b1ff',
       },
       errorIcon: {
         color: 'red',

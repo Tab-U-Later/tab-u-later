@@ -73,7 +73,15 @@ const AddPage = () => {
       })
       setSelections(selects)
     })
+  }
 
+  const reset = () => {
+    let selects = {}
+    tabs.forEach((tab) => {
+      selects = {...selects, [tab.title]: { checked: false, url: tab.url }}
+    })
+    setSelections(selects)
+    setSeshName('')
   }
 
   const handleChange = (event, url) => {
@@ -90,6 +98,7 @@ const AddPage = () => {
     }
     dispatch({type: "ADD_SESSION", payload: {seshName, session}})
     await chrome.storage.sync.set({[seshName]: session});
+    reset();
   }
 
   const handleSelectAll = () => {
