@@ -1,22 +1,17 @@
 /* global chrome */
 
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import styled, {keyframes} from 'styled-components'
-import { Divider, Drawer, List, ListItem, ListSubheader, IconButton, TextField} from '@material-ui/core';
+import styled, { keyframes } from 'styled-components'
+import { useSnackbar } from 'notistack'
+import { Divider, Drawer, List, ListItem, ListSubheader, IconButton, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
-import {Remove, Close, Check } from '@material-ui/icons'
+import { Remove, Close, Check } from '@material-ui/icons'
 import { fetchTitle } from '../../../main/src/utils/fetchTitle';
-import ErrorModal from '../utils/ErrorModal';
 import { usePrevious } from '../utils/usePrevious';
 import { useOnScreen } from '../utils/useOnScreen';
 import { Context } from '../../../store';
-
-const TField = styled(TextField)`
-`
-
 const Header = styled.h2`
   text-align: left;
-
 `
 
 const HeadContainer = styled.div`
@@ -32,13 +27,13 @@ const Title = styled.p`
 
 `
 const colorOut = keyframes`
-  from {background-color: #D0FF4D;}
+  from {background-color: #B2FF59;}
   to {background-color: white;}
 `
 
 const RemoveItem = styled(ListItem)`
   &.new{
-    background-color: #D0FF4D;
+    background-color: #B2FF59;
     &.isVisible{
       animation: ${colorOut} ease 2s 1;
       animation-fill-mode: forwards
@@ -46,18 +41,18 @@ const RemoveItem = styled(ListItem)`
   }
 `
 
-
 const EditCard = (props) => {
   const [newName, updateSeshName] = useState(null)
   const [addUrl, updateUrl] = useState(null);
-  const [modalOpen, setModal] = useState(false)
   const [diff, setDiff] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const {state, dispatch} = useContext(Context);
+  const { state, dispatch } = useContext(Context);
   const prev = usePrevious(state.sessions[props.name])
   const myRef = useRef();
   const onScreen = useOnScreen(myRef);
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
   const classes = makeStyles(iconStyles)();
+
   function iconStyles() {
     return {
       successIcon: {
@@ -68,11 +63,25 @@ const EditCard = (props) => {
       },
     }
   }
-
-  const updateName = async () => {
-    await chrome.storage.sync.remove([props.name]);
-    await chrome.storage.sync.set({
+  /* TODO: CHANGE TO HANDLE GLOBAL STATE MANAGEMENT */
+  const updateName = () => {
+    let names = Object.keys(state.sessions)
+    for(let i = 0; i < names.length; i++){
+      if(names[i] === newName){
+        enqueueSnackbar('Name Already Exists!', {
+          variant: 'error'
+        })
+        return;
+      }
+    }
+    dispatch({type: "UPDATE_NAME", payload: {name: props.name, newName: newName}})
+    chrome.storage.sync.remove([props.name]);
+    chrome.storage.sync.set({
       [newName]: state.sessions[props.name]
+    }, function () {
+      enqueueSnackbar('Name Successfully Changed!', {
+        variant: 'success'
+      })
     })
     updateSeshName('');
     props.toggleDrawer(false);
@@ -86,9 +95,13 @@ const EditCard = (props) => {
       }
     })
 
-    dispatch({type: "REMOVE_TAB", payload: {name: props.name, session: newSesh}});
+    dispatch({ type: "REMOVE_TAB", payload: { name: props.name, session: newSesh } });
     chrome.storage.sync.set({
       [props.name]: newSesh
+    }, function () {
+      enqueueSnackbar('Tab Successfully Removed!', {
+        variant: 'success'
+      })
     })
   }
 
@@ -96,34 +109,40 @@ const EditCard = (props) => {
   const addTab = () => {
     fetchTitle(addUrl, (content) => {
       if (content !== 404) {
-        for(let i = 0; i < state.sessions[props.name].length; i++){
-          if(content.url.includes(state.sessions[props.name][i].url)){
-            setErrorMessage("The URL you tried to add is already in this sessions!")
-            setModal(true)
+        for (let i = 0; i < state.sessions[props.name].length; i++) {
+          if (content.url.includes(state.sessions[props.name][i].url)) {
+            enqueueSnackbar("URL already in session!", {
+              variant: 'error'
+            })
             return;
           }
         }
-        chrome.storage.sync.set({ [props.name]: [...state.sessions[props.name], content] })
-        dispatch({type: "ADD_TAB", payload: {name: props.name, url: content}})
+        chrome.storage.sync.set({ [props.name]: [...state.sessions[props.name], content] }, function () {
+          enqueueSnackbar('Tab Successfully Added!', {
+            variant: 'success'
+          })
+        })
+        dispatch({ type: "ADD_TAB", payload: { name: props.name, url: content } })
         updateUrl('')
       }
       else {
-        setErrorMessage("The URL you provided is not valid")
-        setModal(true)
+        enqueueSnackbar("Invalid URL", {
+          variant: 'error'
+        })
       }
     })
   }
 
-  useEffect(()=> {
-    if(prev !== undefined){
+  useEffect(() => {
+    if (prev !== undefined) {
       const differ = state.sessions[props.name].filter(tab => !prev.includes(tab))
       setDiff(differ[0]);
     }
   }, [state.sessions[props.name]])
 
-  useEffect(()=> {
-    if(onScreen === true){
-      return function cleanup(){
+  useEffect(() => {
+    if (onScreen === true) {
+      return function cleanup() {
         setDiff(null);
       }
     }
@@ -143,7 +162,7 @@ const EditCard = (props) => {
 
         <List subheader={<ListSubheader disableSticky>Change Session Name</ListSubheader>}>
           <ListItem>
-            <TField id="outlined-basic" label="Rename Session" variant="outlined" size="small" value={newName} onChange={(e) => updateSeshName(e.target.value)} />
+            <TextField id="outlined-basic" label="Rename Session" variant="outlined" size="small" value={newName} onChange={(e) => updateSeshName(e.target.value)} />
             <IconButton className={(newName === null || newName === '') ? 'null' : classes.successIcon} disabled={newName === null || newName === ''} onClick={updateName}>
               <Check />
             </IconButton>
@@ -154,12 +173,11 @@ const EditCard = (props) => {
 
         <List subheader={<ListSubheader disableSticky>Add a Tab</ListSubheader>}>
           <ListItem>
-            <TField id="outlined-basic" label="Tab URL" variant="outlined" size="small" value={addUrl} onChange={(e) => updateUrl(e.target.value)} />
+            <TextField id="outlined-basic" label="Tab URL" variant="outlined" size="small" value={addUrl} onChange={(e) => updateUrl(e.target.value)} />
             <IconButton className={(addUrl === null || addUrl === '') ? 'null' : classes.successIcon} disabled={addUrl === null || addUrl === ''} onClick={() => addTab()}>
               <Check />
             </IconButton>
           </ListItem>
-          <ErrorModal toggleModal={setModal} open={modalOpen} message={errorMessage}/>
         </List>
 
         <Divider />

@@ -1,17 +1,24 @@
-/* global chrome */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { SnackbarProvider } from 'notistack'
 import './index.css';
 import App from './App';
 import reportWebVitals from './main/src/utils/reportWebVitals';
-import {ThemeProvider} from '@material-ui/core/styles'
-import {theme} from '../src/client/components/theme'
+import { ThemeProvider } from '@material-ui/core/styles'
+import { theme } from '../src/client/components/theme'
 
 ReactDOM.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
+    <SnackbarProvider
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+    >
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

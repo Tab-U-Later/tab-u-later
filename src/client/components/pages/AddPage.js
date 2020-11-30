@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import Fab from '@material-ui/core/Fab';
 import {Add, Close, Done} from '@material-ui/icons';
 import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField } from '@material-ui/core';
+import { useSnackbar } from 'notistack'
 import { Context } from '../../../store';
 import ErrorModal from '../utils/ErrorModal'
 
@@ -58,6 +59,7 @@ const AddPage = () => {
   const [seshName, setSeshName] = useState(null);
   const [modalOpen, setModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('');
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const { state, dispatch } = useContext(Context);
 
@@ -91,12 +93,13 @@ const AddPage = () => {
     setSelections({...selections, [event.target.name]: {checked: event.target.checked, url: url}})
   }
 
-  const addSession = async () => {
+  const addSession = () => {
     let names = Object.keys(state.sessions)
     for(let i = 0; i < names.length; i++){
       if(names[i] === seshName){
-        setErrorMessage("The name you are trying to use already exists!")
-        setModal(true)
+        enqueueSnackbar('Name Already Exists!', {
+          variant: 'error'
+        })
         return;
       }
     }
@@ -108,7 +111,11 @@ const AddPage = () => {
       }
     }
     dispatch({type: "ADD_SESSION", payload: {seshName, session}})
-    await chrome.storage.sync.set({[seshName]: session});
+    chrome.storage.sync.set({[seshName]: session}, function(){
+      enqueueSnackbar('Session Successfully Added!', {
+        variant: 'success'
+      })
+    });
     reset();
   }
 

@@ -13,6 +13,10 @@ export function reducer(state, action){
             let newSessions = state.sessions;
             delete newSessions[action.payload];
             return {...state, sessions: newSessions};
+        case "UPDATE_NAME":
+            let temp = state.sessions[action.payload.name]
+            delete state.sessions[action.payload.name]
+            return {...state, sessions: {...state.sessions, [action.payload.newName]: temp}}
         case "ADD_TAB":
             return {...state, sessions: {...state.sessions, [action.payload.name]: [...state.sessions[action.payload.name], action.payload.url]}}
         case "REMOVE_TAB":
