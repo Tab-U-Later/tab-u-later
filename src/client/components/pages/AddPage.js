@@ -6,6 +6,7 @@ import Fab from '@material-ui/core/Fab';
 import {Add, Close, Done} from '@material-ui/icons';
 import { Divider, Drawer, List, ListItem, ListSubheader, FormControlLabel, Checkbox, IconButton, Button, TextField } from '@material-ui/core';
 import { Context } from '../../../store';
+import ErrorModal from '../utils/ErrorModal'
 
 
 const FButton = styled(Fab)`
@@ -55,6 +56,9 @@ const AddPage = () => {
   const [isDone, setDone] = useState(false);
   const [selAll, setSelAll] = useState(null);
   const [seshName, setSeshName] = useState(null);
+  const [modalOpen, setModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('');
+
   const { state, dispatch } = useContext(Context);
 
   const toggleDrawer = (event) => {
@@ -63,7 +67,6 @@ const AddPage = () => {
     }
     setOpen(!open);
   };
-
   const getTabs = () => {
     chrome.tabs.query({ currentWindow: true }, function (result) {
       setTabs(result);
@@ -89,6 +92,14 @@ const AddPage = () => {
   }
 
   const addSession = async () => {
+    let names = Object.keys(state.sessions)
+    for(let i = 0; i < names.length; i++){
+      if(names[i] === seshName){
+        setErrorMessage("The name you are trying to use already exists!")
+        setModal(true)
+        return;
+      }
+    }
     setOpen(false);
     let session = [];
     for(const key in selections){
@@ -154,6 +165,7 @@ const AddPage = () => {
               {isDone ? <DoneButton color='secondary' onClick={addSession}>
                 <Done />
               </DoneButton> : null}
+              <ErrorModal toggleModal={setModal} open={modalOpen} message={errorMessage}/>
             </ButtonContainer>
 
             <Divider />

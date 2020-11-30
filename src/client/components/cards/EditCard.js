@@ -6,7 +6,7 @@ import { Divider, Drawer, List, ListItem, ListSubheader, IconButton, TextField} 
 import { makeStyles } from '@material-ui/core/styles'
 import {Remove, Close, Check } from '@material-ui/icons'
 import { fetchTitle } from '../../../main/src/utils/fetchTitle';
-import UrlNotFound from '../utils/UrlNotFound';
+import ErrorModal from '../utils/ErrorModal';
 import { usePrevious } from '../utils/usePrevious';
 import { useOnScreen } from '../utils/useOnScreen';
 import { Context } from '../../../store';
@@ -52,6 +52,7 @@ const EditCard = (props) => {
   const [addUrl, updateUrl] = useState(null);
   const [modalOpen, setModal] = useState(false)
   const [diff, setDiff] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const {state, dispatch} = useContext(Context);
   const prev = usePrevious(state.sessions[props.name])
   const myRef = useRef();
@@ -95,11 +96,19 @@ const EditCard = (props) => {
   const addTab = () => {
     fetchTitle(addUrl, (content) => {
       if (content !== 404) {
+        for(let i = 0; i < state.sessions[props.name].length; i++){
+          if(content.url.includes(state.sessions[props.name][i].url)){
+            setErrorMessage("The URL you tried to add is already in this sessions!")
+            setModal(true)
+            return;
+          }
+        }
         chrome.storage.sync.set({ [props.name]: [...state.sessions[props.name], content] })
         dispatch({type: "ADD_TAB", payload: {name: props.name, url: content}})
         updateUrl('')
       }
       else {
+        setErrorMessage("The URL you provided is not valid")
         setModal(true)
       }
     })
@@ -150,7 +159,7 @@ const EditCard = (props) => {
               <Check />
             </IconButton>
           </ListItem>
-          <UrlNotFound toggleModal={setModal} open={modalOpen} />
+          <ErrorModal toggleModal={setModal} open={modalOpen} message={errorMessage}/>
         </List>
 
         <Divider />
@@ -158,7 +167,7 @@ const EditCard = (props) => {
         <List subheader={<ListSubheader disableSticky>Saved Tabs</ListSubheader>}>
           {state.sessions[props.name].map((tab) => (
             <RemoveItem ref={diff && (tab.title === diff.title ? myRef : null)} className={diff && (tab.title === diff.title ? (onScreen ? 'new isVisible' : 'new') : null)}>
-              <IconButton size='medium' className={classes.errorIcon} onClick={() => removeTabs(tab.title)}>
+              <IconButton size='medium' color='primary' onClick={() => removeTabs(tab.title)}>
                 <Remove />
               </IconButton>
               <Title>{tab.title.length > 15 ? tab.title.substring(0, 15) + '...' : tab.title}</Title>
