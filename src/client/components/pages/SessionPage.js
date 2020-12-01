@@ -39,7 +39,7 @@ const SessionPage = () => {
         {Object.keys(state.sessions).length >= 1 ?
           Object.entries(state.sessions).map(([key, value]) => (
             <Grid key={key} item>
-              <SessionCard name={key} />
+              <SessionCard name={key}/>
             </Grid>
           ))
           :
